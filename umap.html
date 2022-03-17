@@ -162,87 +162,218 @@
 <body>
 <header id="title-block-header">
 <h1 class="title">Umap, l’éditeur de cartes interactives</h1>
+<p class="subtitle">Atelier du stretching numérique</p>
 <p class="author">Damien Belvèze</p>
-<p class="date">20-12-2021</p>
+<p class="date">16-03-2021</p>
 </header>
 <p><img src="images/logo_stretching_num.png" /></p>
-<h1 id="trouver-des-données-sur-wikidata-les-requêtes-sparql">Trouver
-des données sur Wikidata : les requêtes sparql</h1>
-<p>Le SPARQL est un langage d’interrogation pour chercher des entités
-liées, ce langage d’interrogation a été mis au point par le consortium
-World Wide Web et sert de langage d’interrogation à [[Wikidata]]</p>
-<p>Analyse d’une requête en Sparql sur Wikidata
-(https://query.wikidata.org)</p>
+<h2 id="trouver-des-données-sur-wikidata-les-requêtes-sparql">Trouver
+des données sur Wikidata : les requêtes sparql</h2>
+<p>Le SPARQL est un langage de requêtes pour chercher des entités liées,
+ce langage d’interrogation a été mis au point par le consortium World
+Wide Web et sert de langage d’interrogation à Wikidata</p>
+<h3 id="le-format-rdf">Le format RDF</h3>
+<p>Le SPARQL permet de faire des requêtes sur des données présentées
+selon un <strong>schéma RDF</strong> Ce schéma est basé sur des
+triplets. Un triplet est constitué d’un <em>sujet</em>, d’un
+<em>prédicat</em> (ou d’une propriété) et d’un <em>objet</em>.</p>
+<p>Par exemple</p>
+<p>Alice(=sujet) connaît(=prédicat) Bob(=objet)<br />
+</p>
+<p>Bob(=sujet) joue(=prédicat) au tennis(=objet)<br />
+</p>
+<figure>
+<img src="images/triple.png" alt="Les triplets dans RDF" />
+<figcaption aria-hidden="true">Les triplets dans RDF</figcaption>
+</figure>
+<h3 id="analyse-dune-requête-en-sparql-sur-wikidata">Analyse d’une
+requête en Sparql sur Wikidata</h3>
+<p>Pour obtenir des données présentes dans Wikidata, on peut utiliser
+l’éditeur de requête mis à disposition sur <a
+href="https://query.wikidata.org">ce portail</a></p>
 <p>Nous allons utiliser comme exemple de requête simple une recherche
-sur les cimetières de guerre allemands répertoriés dans Wikidata :</p>
+sur les cimetières de guerre allemands opérés par une association pour
+le souvenir des soldats tombés et répertoriés dans Wikidata :</p>
 <p><img src="images/sparql_query.png" /></p>
-<pre class="sparql"><code>\#cemeteries
-SELECT ?item ?itemLabel ?place ?coord
+<pre><code>#cemeteries
+SELECT ?item ?itemLabel
 WHERE
 {
   ?item wdt:P31 wd:Q1241568 .
   ?item wdt:P137 wd:Q708567 .
-  ?item wdt:P625 ?coord.
 
    SERVICE wikibase:label { bd:serviceParam wikibase:language &quot;en&quot;. }
 }</code></pre>
 <p>première ligne : commentaire (titre de la requête)</p>
 <p>SELECT : indique les informations issus des résultats à faire figurer
 en colonne, en l’occurrence le numéro de l’élément wikidata, son titre,
-l’endroit assigné à l’élément, et les coordonnées géographiques de
-l’endroit</p>
+les coordonnées géographiques de l’élément et l’image associée à cet
+élément.</p>
 <p>WHERE {} permet de donner les critères de recherche.</p>
-<p>?item wdt:P31 wd:Q1241568 : on retrouve à cet endroit le triplet
-<em>item</em>, <em>propriété</em>, <em>valeur</em> : tous les items qui
-ont pour propriété (est une instance de) la valeur “cimetière
-militaire”</p>
+<pre><code>?item wdt:P31 wd:Q1241568</code></pre>
+<p>on retrouve à cet endroit le triplet <em>item</em>,
+<em>propriété</em>, <em>valeur</em> : on chercher tous les
+<strong>items</strong>(=sujet) qui <strong>sont des instances
+de</strong>(=prédicat) <strong>cimetière militaire</strong>(=objet)</p>
 <p>Même chose à la ligne suivante :</p>
-<p>?item wdt:P137 wd:Q708567 . tout item qui a pour propriété (est opéré
-par) l’agence “Volksbund Deutsche Kriegsgräberfürsorge”</p>
-<p>?item wdtP625 ?coord. tout item qui dispose de coordonnées
-géographiques</p>
-<p>Les résultats sont téléchargeables</p>
+<pre><code>?item wdt:P137 wd:Q708567 .</code></pre>
+<p>On cherche à obtenir tous les items qui observent la condition
+précédente et ont en outre pour propriété d’être opérés par)
+l’association “Volksbund Deutsche Kriegsgräberfürsorge”</p>
+<p>On obtient <strong>9 résultats</strong> sous la forme d’un tableau
+qui comporte en première colonne l’identifiant de l’élément et en
+deuxième colonne le label (=nom de l’élément)</p>
+<h3
+id="obtenir-les-coordonnées-et-les-images-des-éléments-obtenus">obtenir
+les coordonnées et les images des éléments obtenus</h3>
+<p>Si on veut ajouter des colonnes supplémentaires pour obtenir les
+coordonnées géographiques et les images (liens vers les imagges de ces
+éléments dans Wikimedia Commons), il faut ajouter
+<strong>?coord</strong> et <strong>?image</strong> après <em>SELECT</em>
+et deux conditions supplémentaires :</p>
+<pre><code>?item wdt:P625 ?coord.
+?item wdt:P18 ?image.</code></pre>
+<p>Requête prise dans sa globalité :</p>
+<pre><code>#cemeteries
+SELECT ?item ?itemLabel ?coord ?image
+WHERE
+{
+  ?item wdt:P31 wd:Q1241568 .
+  ?item wdt:P137 wd:Q708567 .
+  ?item wdt:P625 ?coord.
+  ?item wdt:P18 ?image.
+
+   SERVICE wikibase:label { bd:serviceParam wikibase:language &quot;en&quot;. }
+}</code></pre>
+<p>On n’obtient plus que <strong>8 résultats</strong> parce que
+l’élément <a
+href="https://www.wikidata.org/wiki/Q17353494">Q17353494</a> ne dispose
+pas d’image. On peut néanmoins trouver une image de ce cimetière <a
+href="https://de.wikipedia.org/wiki/Deutsche_Kriegsgr%C3%A4berst%C3%A4tte_auf_dem_Georgenberg#/media/Datei:Spremberg_Deutsche_Kriegsgr%C3%A4berst%C3%A4tte_auf_dem_Georgenberg_Zentrale_Sichtachse.JPG">sur
+la Wikipédia allemande</a> et compléter le tableau extrait de Wikidata à
+la main.</p>
 <p><img src="images/sparql_results.png" /></p>
-<p>Pour avoir en plus les images, on peut ajouter dans le Where {} la
-condition suivante :</p>
-<p>?item wdt:P18 ?image.</p>
-<p>et ajouter ?image après SELECT</p>
+<p>Télécharger les résultats sous la forme d’un fichier CSV et l’ouvrir
+avec LibreOffice Calc (encodage en UTF8)</p>
 <h1 id="formater-le-fichier-téléchargé-de-wikidata">formater le fichier
 téléchargé de Wikidata</h1>
-<p>clic droit sur la colonne D &gt; “insérer une colonne après” clic
-droit sur la colonne &gt; textes en colonnes &gt; utiliser l’espace
-comme séparateur On obtient désormais deux colonnes, l’une avec la
-longitude (colonne D), l’autre avec la latitude (colonne E) Umap repère
-les colonnes dont les entêtes commencent par lon et lat et les
-interprête comme des entête de colonnes dans lesquelles se trouvent les
-coordonnées géographiques décimales (48.5678 est correct mais pas
-48,5678 ni 48°5678, veiller à ce que les valeurs présentes dans les
-colonnes soient bien formatées) Colonne D : supprimer <em>Point(</em>
-avec la fonction chercher + remplacer (Ctrl+H) Colonne E : supprimer la
-parenthèse fermante</p>
-<h1
-id="paramétrer-laffichage-des-données-importées-dans-umap">paramétrer
-l’affichage des données importées dans Umap</h1>
+<p>Les actions de formatage qui suivent sont propres au logiciel Calc de
+la suite <a href="https://fr.libreoffice.org/">LibreOffice</a><br />
+</p>
+<ul>
+<li><p>clic droit sur la colonne C “insérer une colonne après”<br />
+</p></li>
+<li><p>Sélectionner la colonne C et avec Ctrl+H remplacer
+<em>Point(</em> et <em>)</em> par rien pour supprimer ces
+caractères.<br />
+</p></li>
+<li><p>sélectionner la colonne C, dans <em>Données</em>, sélectionner
+<em>textes en colonnes</em> et utiliser l’espace comme séparateur. On
+obtient désormais deux colonnes, l’une avec la longitude (colonne C),
+l’autre avec la latitude (colonne D). Umap repère les colonnes dont les
+entêtes commencent par <em>lon</em> et <em>lat</em> et les interprête
+comme des entête de colonnes dans lesquelles se trouvent les coordonnées
+géographiques décimales (48.5678 est correct mais pas 48,5678 ni
+48°5678, veiller à ce que les valeurs présentes dans les colonnes soient
+bien formatées)<br />
+</p></li>
+<li><p>afficher comme entête à la colonne C (à la place de coord)
+<em>lon</em> et à la colonne D <em>lat</em><br />
+</p></li>
+<li><p>renommer la colonne “itemlabel” avec l’entête “nom” (laisser en
+colonne E l’entête “image”)<br />
+</p></li>
+</ul>
+<h2 id="importer-les-données-dans-umap">Importer les données dans
+umap</h2>
+<h3 id="un-mot-sur-umap-et-openstreetmap">Un mot sur Umap et
+OpenStreetMap</h3>
+<p><a href="umap.openstreetmap.fr/">Umap</a> est un éditeur de cartes
+qui fonctionne avec les cartes d’<a
+href="https://www.openstreetmap.org">OpenStreetMap</a>. IL s’agit d’un
+éditeur libre en cohérence avec le projet libre qui est derrière
+OpenStreetMap (OSM). Lorsqu’on dispose d’un compte sur OSM (si ce n’est
+pas le cas, <a href="https://www.openstreetmap.org/user/new">il faudra
+s’en créer un</a>), on peut l’utiliser pour accéder à Umap et conserver
+ses propres cartes. Les associations en faveur du libre utilisent depuis
+longtemps OpenStreetMap, les institutions s’y sont mises quand en 2018,
+Google a commencé à faire payer les sites qui ont beaucoup de visiteurs
+pour leur utilisation de Googlemaps (cf. <a
+href="https://www.lemonde.fr/chronique-des-communs/article/2018/06/01/hausse-des-tarifs-de-google-maps-on-a-plus-que-jamais-besoin-d-alternatives-libres_5307968_5049504.html?utm_term=Autofeed&amp;utm_campaign=Echobox&amp;utm_medium=Social&amp;utm_source=Twitter#link_time=1527839164">article
+du Monde</a>)</p>
+<p>OpenStreetMap est soutenue par une communauté d’utilisateurs très
+active, ce qui lui a donné dans bien des cas un avantage sur Google Map
+(<a
+href="https://twitter.com/OSMCameroun/status/1085939637770702848">exemple
+de la cartographie du Cameroun</a>)</p>
+<h3 id="importer-le-fichier-de-données">Importer le fichier de
+données</h3>
+<figure>
+<img src="images/import_umap.png"
+alt="importer les données dans Umap" />
+<figcaption aria-hidden="true">importer les données dans
+Umap</figcaption>
+</figure>
+<p>Ouvrir à droite l’icone “flèche vers le haut”, cliquer sur parcourir
+et charger le fichier de données.</p>
 <p>Si l’import du fichier ne se fait pas bien à partir du module
-d’import. Copier les valeurs avec leurs entêtes dans le module d’import,
-si c’est demandé, spécifiez qu’il s’agit d’un fichier en format CSV.</p>
+d’import, copier les valeurs avec leurs entêtes dans le module d’import
+(“collez vos données ici”).<br />
+Si c’est demandé, spécifiez qu’il s’agit d’un fichier en format CSV.</p>
 <p>Des marqueurs devraient apparaître pour indiquer les lieux figurant
 dans le jeu de données.</p>
+<h3 id="paramétrer-la-vignette-liée-au-marqueur">paramétrer la vignette
+liée au marqueur</h3>
 <p>Créer un popup avec une description du marqueur :</p>
-<p>éditer le calque dans lequel ont été chargées les données. cliquer
-sur options d’interactions conserver popup par défaut Dans Gabarit du
-contenu de la popup, ajouter les entêtes de la colonne. # = titre 1 ## =
-titre 2, etc. Pour insérer une image : {{{entête de la colonne}}}</p>
-<p>Pour notre fichier cela donne :</p>
-<p># {itemLabel} {{{image}}}</p>
+<p>Dans le menu de droite de Umap, cliquer sur l’icone “Editer les
+paramètres” (roue crantée), puis sélectionner “Option d’interaction par
+défaut”, puis “gabarit du contenu de la popup”(suivi d’une infobulle) A
+cet endroit, remplacer # {name} par # {nom} et {description} par
+{image}</p>
+<p>Le # indique simplement que la valeur nom va s’afficher sous la forme
+d’un titre. S’il y avait une légende dans les données ou un titre
+secondaire on aurait pu ajouter un #2 pour faire un titre 2 Pour faire
+en sorte que l’image s’affiche il faut rajouter des accolades autour de
+images (trois pour ouvrir et trois pour fermer). Les valeurs attendues
+sont donc celles-ci :</p>
+<pre><code># {nom}
+{{{image}}}</code></pre>
 <p>Pour visualiser les changements, enregistrer les modifications et
 désactiver le mode édition</p>
 <figure>
 <img src="images/umap1.png" alt="carte interactive" />
 <figcaption aria-hidden="true">carte interactive</figcaption>
 </figure>
-<h1 id="exercice.">exercice.</h1>
-<p>Réaliser un calque supplémentaire avec des données sur les cimetières
-de guerre en Allemagne</p>
+<h2 id="exercices-dextraction-de-données-depuis-wikidata.">exercices
+d’extraction de données depuis Wikidata.</h2>
+<p>Réaliser un calque (calque 2) supplémentaire avec l’ensemble des
+musées maritimes français</p>
+<p>Solution :</p>
+<pre><code>SELECT DISTINCT ?item ?itemLabel ?place ?coord
+WHERE {
+      ?item wdt:P17 wd:Q142.
+      ?item wdt:P31 wd:Q1863818.
+      ?item wdt:P625 ?coord.
+
+  SERVICE wikibase:label { bd:serviceParam wikibase:language &quot;en&quot;. }
+}</code></pre>
+<p>Réaliser un calque supplémentaire (calque 3) avec l’ensemble des
+centrales nucléaires ukrainiennes</p>
+<p>Solution :</p>
+<pre><code>
+#nuclear plants in Ukraine
+SELECT ?item ?itemLabel ?place ?coord
+WHERE
+{
+  ?item wdt:P31 wd:Q134447 .
+  ?item wdt:P17 wd:Q212 .
+  ?item wdt:P625 ?coord.
+
+   SERVICE wikibase:label { bd:serviceParam wikibase:language &quot;en&quot;. }
+}
+</code></pre>
+<h2 id="remerciements">Remerciements</h2>
+<p>Merci à Nicolas Vigneron (@Belett) qui m’a inité à l’interrogation de
+Wikipédia au moyen du langage de requêtes SPARQL</p>
 </body>
 </html>
